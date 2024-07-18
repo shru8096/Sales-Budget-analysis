@@ -1,0 +1,103 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the datasets
+adventureworks_df = pd.read_excel('AdventureWorks_database.xlsx')
+budget_df = pd.read_excel('Budget.xlsx')
+
+# Transform the AdventureWorks data
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+# Load the datasets from the Excel files
+adventureworks_path = 'AdventureWorks_Database.xlsx'
+budget_path = 'Budget.xlsx'
+
+adventureworks_data = pd.read_excel(adventureworks_path)
+budget_data = pd.read_excel(budget_path)
+
+# Display the first few rows of each dataset
+print("AdventureWorks Data:")
+print(adventureworks_data.head())
+
+print("\nBudget Data:")
+print(budget_data.head())
+
+# Display the column names of each dataset
+print("\nAdventureWorks Data Columns:")
+print(adventureworks_data.columns)
+
+print("\nBudget Data Columns:")
+print(budget_data.columns)
+
+# Data Cleaning (if needed)
+adventureworks_data.dropna(inplace=True)
+budget_data.dropna(inplace=True)
+
+# Data Transformation
+# Example: Convert date columns to datetime
+if 'Order Date' in adventureworks_data.columns:
+    adventureworks_data['Order Date'] = pd.to_datetime(adventureworks_data['Order Date'])
+if 'Ship Date' in adventureworks_data.columns:
+    adventureworks_data['Ship Date'] = pd.to_datetime(adventureworks_data['Ship Date'])
+
+# Example: Extract year and month from the Order Date
+if 'Order Date' in adventureworks_data.columns:
+    adventureworks_data['Order Year'] = adventureworks_data['Order Date'].dt.year
+    adventureworks_data['Order Month'] = adventureworks_data['Order Date'].dt.month
+
+# Merge the datasets if necessary (example based on a common column like 'Product ID')
+# merged_data = pd.merge(adventureworks_data, budget_data, on='Product ID')
+
+# Key Metrics Calculation
+total_sales = adventureworks_data['Total Revenue'].sum()
+total_budget = budget_data['Budget'].sum()
+total_variance = total_sales - total_budget
+
+# Aggregations
+sales_by_year = adventureworks_data.groupby('Order Year')['Total Revenue'].sum()
+sales_by_month = adventureworks_data.groupby('Order Month')['Total Revenue'].sum()
+budget_by_year = budget_data.groupby('Year')['Budget'].sum()
+variance_by_year = sales_by_year - budget_by_year
+
+# Visualization
+plt.figure(figsize=(14, 7))
+
+# Sales by Year
+plt.subplot(2, 2, 1)
+sns.barplot(x=sales_by_year.index, y=sales_by_year.values)
+plt.title('Sales by Year')
+plt.xlabel('Year')
+plt.ylabel('Total Sales')
+
+# Sales by Month
+plt.subplot(2, 2, 2)
+sns.barplot(x=sales_by_month.index, y=sales_by_month.values)
+plt.title('Sales by Month')
+plt.xlabel('Month')
+plt.ylabel('Total Sales')
+
+# Sales vs Budget by Year
+plt.subplot(2, 2, 3)
+bar_width = 0.35
+index = np.arange(len(sales_by_year))
+plt.bar(index, sales_by_year, bar_width, label='Sales')
+plt.bar(index + bar_width, budget_by_year, bar_width, label='Budget')
+plt.xlabel('Year')
+plt.ylabel('Amount')
+plt.title('Sales vs Budget by Year')
+plt.xticks(index + bar_width / 2, sales_by_year.index)
+plt.legend()
+
+# Variance by Year
+plt.subplot(2, 2, 4)
+sns.lineplot(x=variance_by_year.index, y=variance_by_year.values, marker='o')
+plt.title('Variance by Year')
+plt.xlabel('Year')
+plt.ylabel('Variance (Sales - Budget)')
+
+plt.tight_layout()
+plt.show()
